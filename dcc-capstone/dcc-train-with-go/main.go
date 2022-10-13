@@ -34,6 +34,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -68,7 +69,8 @@ func getTrains(context *gin.Context) {
 		log.Println(err)
 	}
 	path = filepath.Join(path, "..")
-	path = filepath.Join(path, "train-controller-dcc-main")
+	path = filepath.Join(path, "train-controller-dcc")
+	print(path)
 
 	jsonFile, err := os.Open(path + "/.dccpi")
 
@@ -83,6 +85,21 @@ func getTrains(context *gin.Context) {
 	context.IndentedJSON(http.StatusOK, result["locomotives"])
 }
 
+type Locomotive struct {
+	Name      string `json:"name"`
+	Address   int    `json:"address"`
+	Direction int    `json:"direction"`
+	Speed     int    `json:"speed"`
+	Fl        bool   `json:"fl"`
+	F1        bool   `json:"f1"`
+	F2        bool   `json:"f2"`
+	F3        bool   `json:"f3"`
+	F4        bool   `json:"f4"`
+}
+type Locomotives struct {
+	Locomotives []Locomotive `json:"locomotives"`
+}
+
 func commandTest(context *gin.Context) {
 	var newInstruct instruction
 
@@ -90,7 +107,146 @@ func commandTest(context *gin.Context) {
 		return
 	}
 
+	path, err := os.Getwd()
+	if err != nil {
+		log.Println(err)
+	}
+	path = filepath.Join(path, "..")
+	path = filepath.Join(path, "train-controller-dcc")
+	// print(path)
+
+	jsonFile, err := os.Open(path + "/.dccpi")
+
+	defer jsonFile.Close()
+
+	byteValue, _ := ioutil.ReadAll(jsonFile)
+
+	var result Locomotives
+
+	json.Unmarshal([]byte(byteValue), &result)
+
+	// fmt.Println("\n")
+	// for i := 0; i < len(result.Locomotives); i++ {
+	// 	fmt.Println("Name Train : " + result.Locomotives[i].Name)
+	// 	fmt.Println("Train Address: " + strconv.Itoa(result.Locomotives[i].Address))
+	// 	fmt.Println("Direction Train: " + strconv.Itoa(result.Locomotives[i].Direction))
+	// 	fmt.Println("Front Light: " + strconv.FormatBool(result.Locomotives[i].Fl))
+	// 	fmt.Println("Speed: " + strconv.Itoa(result.Locomotives[i].Speed))
+	// }
+
+	// fmt.Println(result.Locomotives)
 	fmt.Println(newInstruct)
+
+	if newInstruct.Cmd == "register" {
+		var newData Locomotive
+		newData.Name = newInstruct.Arg1
+		newData.Address, _ = strconv.Atoi(newInstruct.Arg2)
+		newData.Speed = 0
+		newData.Direction = 0
+		newData.Fl = true
+		newData.F1 = false
+		newData.F2 = false
+		newData.F3 = false
+		newData.F4 = false
+		newArray := append(result.Locomotives, newData)
+		result.Locomotives = newArray
+		payloadJSON, _ := json.Marshal(result)
+		fmt.Println(payloadJSON)
+		ioutil.WriteFile(path+"/.dccpi", payloadJSON, 0664)
+	} else if newInstruct.Cmd == "unregister" {
+		deleteIndex := 0
+		for i, data := range result.Locomotives {
+			if data.Name == newInstruct.Arg1 {
+				deleteIndex = i
+			} else {
+				continue
+			}
+		}
+		fmt.Println(deleteIndex)
+
+		var unregArray Locomotives
+
+		unregArray1 := result.Locomotives[:deleteIndex]
+		unregArray2 := result.Locomotives[deleteIndex+1:]
+
+		newArray := append(unregArray.Locomotives, unregArray1...)
+		newArray = append(newArray, unregArray2...)
+		fmt.Println(newArray)
+		result.Locomotives = newArray
+		payloadJSON, _ := json.Marshal(result)
+		fmt.Println(payloadJSON)
+		ioutil.WriteFile(path+"/.dccpi", payloadJSON, 0664)
+	} else if newInstruct.Cmd == "speed" {
+		tempSpeed, _ := strconv.Atoi(newInstruct.Arg2)
+		indexSpeed := 0
+		for i, data := range result.Locomotives {
+			if data.Name == newInstruct.Arg1 {
+				indexSpeed = i
+			} else {
+				continue
+			}
+		}
+		fmt.Println(tempSpeed)
+		fmt.Println(result.Locomotives)
+		result.Locomotives[indexSpeed].Speed = tempSpeed
+		payloadJSON, _ := json.Marshal(result)
+		fmt.Println(payloadJSON)
+		ioutil.WriteFile(path+"/.dccpi", payloadJSON, 0664)
+	} else if newInstruct.Cmd == "fl" {
+		lightCmd := newInstruct.Arg2
+		indexFl := 0
+		stateFl := false
+		for i, data := range result.Locomotives {
+			if data.Name == newInstruct.Arg1 {
+				indexFl = i
+			} else {
+				continue
+			}
+		}
+		if lightCmd == "on" {
+			stateFl = true
+		} else if lightCmd == "off" {
+			stateFl = false
+		}
+		result.Locomotives[indexFl].Fl = stateFl
+		payloadJSON, _ := json.Marshal(result)
+		fmt.Println(payloadJSON)
+		ioutil.WriteFile(path+"/.dccpi", payloadJSON, 0664)
+	} else if newInstruct.Cmd == "power" {
+		cmd := newInstruct.Cmd
+		arg1 := newInstruct.Arg1
+		arg2 := newInstruct.Arg2
+		fullCommand := ""
+		if arg1 == "" {
+			fullCommand = "send," + cmd
+		} else if arg2 == "" {
+			fullCommand = "send," + cmd + "," + arg1
+		} else {
+			fullCommand = "send," + cmd + "," + arg1 + "," + arg2
+		}
+
+		byteCommand := []byte(fullCommand)
+		fmt.Println(cmd)
+		fmt.Println(arg1)
+		fmt.Println(arg2)
+
+		path, err := os.Getwd()
+		if err != nil {
+			log.Println(err)
+		}
+		path = filepath.Join(path, "..")
+		fmt.Println(path)
+
+		ioutil.WriteFile(path+"/instruction.txt", byteCommand, 0644)
+
+	} else if newInstruct.Cmd == "direction" {
+
+		payloadJSON, _ := json.Marshal(result)
+		fmt.Println(payloadJSON)
+		ioutil.WriteFile(path+"/.dccpi", payloadJSON, 0664)
+	} else {
+
+	}
 
 	context.IndentedJSON(http.StatusAccepted, newInstruct)
 }

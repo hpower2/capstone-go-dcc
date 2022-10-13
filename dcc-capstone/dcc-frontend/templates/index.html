@@ -31,7 +31,7 @@
         {% endfor %}
       </select>
       <input type="text" name="arg2" id="unregArg2" value="" onkeypress="console.log('unreg data')" hidden>
-      <button type="submit">Unregister</button>
+      <button onclick="sendCommand('unreg')">Unregister</button>
     </div>
     <div id="fl" action="{{url_for('command', cmd="fl")}}" method="post" hidden>
       <input type="text" name="cmd" id="flCmd" value="fl" readonly>
@@ -40,21 +40,25 @@
           <option value="{{train["name"]}}">{{train["name"]}}</option>
         {% endfor %}
       </select>
-      <button type="submit" id="flArg2" name="arg2" value="on">On</button>
-      <button type="submit" id="flArg2" name="arg2" value="off">Off</button>
+      <button onclick="sendCommand('fl',data='on')" id="flArg2on" name="arg2" value="on">On</button>
+      <button onclick="sendCommand('fl',data='off')" id="flArg2off" name="arg2" value="off">Off</button>
     </div>
     <div id="power" action="{{url_for('command', cmd="power")}}" method="post" hidden>
       <input type="text" name="cmd" id="powerCmd" value="power" readonly>
-      <button type="submit" name="arg1" value="on">On</button>
-      <button type="submit" name="arg1" value="off">Off</button>
+      <button onclick="sendCommand('power',data='on')" id="powerArg1on" name="arg1" value="on">On</button>
+      <button onclick="sendCommand('power',data='off')" id="powerArg1off" name="arg1" value="off">Off</button>
       <input type="text" name="arg2" id="powerArg2" onkeypress="console.log('power data')" hidden>
     </div>
     <div id="direction" action="{{url_for('command', cmd="direction")}}" method="post" hidden>
-      <input type="text" name="cmd" id="directionCmd" value="dir" readonly>
-      <input type="text" name="arg1" id="directionArg1" onkeypress="console.log('dir data')">
-      <button type="submit" id="directionArg2" name="arg2" value="forward">Forward</button>
-      <button type="submit" id="directionArg2" name="arg2" value="reverse">Reverse</button>
-      <button type="submit" id="directionArg2" name="arg2" value="backward">Backward</button>
+      <input type="text" name="cmd" id="directionCmd" value="direction" readonly>
+      <select id="directionArg1" name="arg1">
+        {% for train in trainName %}
+          <option value="{{train["name"]}}">{{train["name"]}}</option>
+        {% endfor %}
+      </select>
+      <button onclick="sendCommand('direction',data='forward')" id="directionArg2forward" name="arg2" value="forward">Forward</button>
+      <button onclick="sendCommand('direction',data='reverse')" id="directionArg2reverse" name="arg2" value="reverse">Reverse</button>
+      <button onclick="sendCommand('direction',data='backward')" id="directionArg2backward" name="arg2" value="backward">Backward</button>
     </div>
   </div>
   <form id="form-speed" action="{{url_for('command', cmd="speed")}}" method="post">
@@ -105,10 +109,26 @@
         body: JSON.stringify(speed),
       })
     }
-    function sendCommand(cmd) {
+    function sendCommand(cmd, data="") {
+      console.log(cmd)
+      console.log(data)
       command = document.getElementById(`${cmd}Cmd`).value
-      arg1 = document.getElementById(`${cmd}Arg1`).value
-      arg2 = document.getElementById(`${cmd}Arg2`).value
+      let arg1 = document.getElementById(`${cmd}Arg1${data}`)
+      let arg2 = document.getElementById(`${cmd}Arg2${data}`)
+      try {
+        if (arg1 === null) {
+          arg1 = document.getElementById(`${cmd}Arg1`)
+        }
+        if (arg2 === null) {
+          arg2 = document.getElementById(`${cmd}Arg2`)
+        }
+        
+      }
+      catch(err) {
+        console.log(err)
+      }
+      arg1 = arg1.value
+      arg2 = arg2.value
       console.log(command, arg1, arg2)
       const fullCommand = {cmd: command ,arg1: arg1 , arg2: arg2};
       fetch("http://localhost:5000/command", {

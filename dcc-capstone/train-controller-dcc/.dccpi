@@ -1,0 +1,48 @@
+{
+    "locomotives": [
+        {
+            "name": "train_1",
+            "address": 1,
+            "direction": 0,
+            "speed": 9,
+            "fl": true,
+            "f1": false,
+            "f2": false,
+            "f3": false,
+            "f4": false
+        },
+        {
+            "name": "train_2",
+            "address": 2,
+            "direction": 0,
+            "speed": 0,
+            "fl": true,
+            "f1": false,
+            "f2": false,
+            "f3": false,
+            "f4": false
+        },
+        {
+            "name": "train_3",
+            "address": 3,
+            "direction": 0,
+            "speed": 0,
+            "fl": true,
+            "f1": false,
+            "f2": false,
+            "f3": false,
+            "f4": false
+        },
+        {
+            "name": "train_5",
+            "address": 5,
+            "direction": 0,
+            "speed": 0,
+            "fl": true,
+            "f1": false,
+            "f2": false,
+            "f3": false,
+            "f4": false
+        }
+    ]
+}
