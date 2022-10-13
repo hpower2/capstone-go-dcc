@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+</head>
+
+<body>
+  <select id="ddlViewBy">
+    <option value="register">Register Train</option>
+    <option value="unregister">Unregister Train</option>
+    <option value="fl">Train Front Light</option>
+    <option value="power">Track Power</option>
+    <option value="direction">Train Direction</option>
+  </select>
+  <div id="form-selected">
+    <div id="register" action="{{url_for('command', cmd="register")}}" method="post" hidden>
+      <input type="text" name="cmd" id="regCmd" value="register" readonly>
+      <input type="text" name="arg1" id="regArg1" onkeypress="console.log('reg data')">
+      <input type="text" name="arg2" id="regArg2" onkeypress="console.log('reg data')">
+      <button onclick="sendCommand('reg')">Register</button>
+    </div>
+    <div id="unregister" action="{{url_for('command', cmd="unregister")}}" method="post" hidden>
+      <input type="text" name="cmd" id="unregCmd" value="unregister" readonly>
+      <select id="unregArg1" name="arg1">
+        {% for train in trainName %}
+          <option value="{{train["name"]}}">{{train["name"]}}</option>
+        {% endfor %}
+      </select>
+      <input type="text" name="arg2" id="unregArg2" value="" onkeypress="console.log('unreg data')" hidden>
+      <button type="submit">Unregister</button>
+    </div>
+    <div id="fl" action="{{url_for('command', cmd="fl")}}" method="post" hidden>
+      <input type="text" name="cmd" id="flCmd" value="fl" readonly>
+      <select id="flArg1" name="arg1">
+        {% for train in trainName %}
+          <option value="{{train["name"]}}">{{train["name"]}}</option>
+        {% endfor %}
+      </select>
+      <button type="submit" id="flArg2" name="arg2" value="on">On</button>
+      <button type="submit" id="flArg2" name="arg2" value="off">Off</button>
+    </div>
+    <div id="power" action="{{url_for('command', cmd="power")}}" method="post" hidden>
+      <input type="text" name="cmd" id="powerCmd" value="power" readonly>
+      <button type="submit" name="arg1" value="on">On</button>
+      <button type="submit" name="arg1" value="off">Off</button>
+      <input type="text" name="arg2" id="powerArg2" onkeypress="console.log('power data')" hidden>
+    </div>
+    <div id="direction" action="{{url_for('command', cmd="direction")}}" method="post" hidden>
+      <input type="text" name="cmd" id="directionCmd" value="dir" readonly>
+      <input type="text" name="arg1" id="directionArg1" onkeypress="console.log('dir data')">
+      <button type="submit" id="directionArg2" name="arg2" value="forward">Forward</button>
+      <button type="submit" id="directionArg2" name="arg2" value="reverse">Reverse</button>
+      <button type="submit" id="directionArg2" name="arg2" value="backward">Backward</button>
+    </div>
+  </div>
+  <form id="form-speed" action="{{url_for('command', cmd="speed")}}" method="post">
+    <select id="speedArg1" name="arg1">
+        {% for train in trainName %}
+          <option value="{{train["name"]}}">{{train["name"]}}</option>
+        {% endfor %}
+      </select>
+    <label for="customRange1" class="form-label">Train Speed</label>
+    <input
+      type="range"
+      id="points"
+      name="points"
+      value="0"
+      min="0"
+      max="25"
+      onchange="sendSpeed(value)"
+    />
+  </form>
+
+  
+    <script>
+
+    var e = document.getElementById("ddlViewBy");
+    function onChange() {
+      var value = e.value;
+      var text = e.options[e.selectedIndex].text;
+      console.log(value, text);
+      var parent = document.querySelector("#form-selected");
+      let allChildren = parent.querySelectorAll(":scope > div");
+      allChildren.forEach((item) => item.hidden = true)
+      document.getElementById(value).hidden = false
+    }
+    e.onchange = onChange;
+    onChange();
+
+    function sendSpeed(value) {
+      console.log(value);
+      trainName = document.getElementById("speedArg1").value
+      console.log(trainName)
+      const speed = {cmd: "speed" ,arg1: trainName , arg2: value};
+      console.log(speed)
+      fetch("http://localhost:5000/command", {
+        method: "post",
+        headers: {
+          "Content-Type" : "application/json"
+        },
+        body: JSON.stringify(speed),
+      })
+    }
+    function sendCommand(cmd) {
+      command = document.getElementById(`${cmd}Cmd`).value
+      arg1 = document.getElementById(`${cmd}Arg1`).value
+      arg2 = document.getElementById(`${cmd}Arg2`).value
+      console.log(command, arg1, arg2)
+      const fullCommand = {cmd: command ,arg1: arg1 , arg2: arg2};
+      fetch("http://localhost:5000/command", {
+        method: "post",
+        headers: {
+          "Content-Type" : "application/json"
+        },
+        body: JSON.stringify(fullCommand),
+      })
+    }
+  </script>
+</body>
+
+</html>

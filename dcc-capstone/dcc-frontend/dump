@@ -1,0 +1,29 @@
+setInterval(function () {
+    if (nama['Nama'] === 'Irvine') {
+      //  block of code to be executed if the condition is true
+    } else {
+      fetch("http://localhost:5000/api/test", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: nama,
+      })
+        .then((response) => response.json())
+        .then((result) => {
+          console.log("Success:", result);
+        });
+    }
+  }, 1000);
+
+
+  const command = {cmd: cmd ,arg1: trainName , arg2: value};
+      console.log(command)
+      fetch("http://localhost:5000/command/speed", {
+        method: "post",
+        mode: "no-cors",
+        headers: {
+          "Content-Type" : "application/json"
+        },
+        body: JSON.stringify(speed),
+      })
