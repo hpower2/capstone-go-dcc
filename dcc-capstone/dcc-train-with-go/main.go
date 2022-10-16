@@ -302,10 +302,15 @@ func editInstruction(context *gin.Context) {
 }
 
 func sendIntruction(context *gin.Context) {
-	instruction := &instructions
-	cmd := instruction.Cmd
-	arg1 := instruction.Arg1
-	arg2 := instruction.Arg2
+	var newInstruct instruction
+
+	if err := context.BindJSON(&newInstruct); err != nil {
+		return
+	}
+
+	cmd := newInstruct.Cmd
+	arg1 := newInstruct.Arg1
+	arg2 := newInstruct.Arg2
 	fullCommand := ""
 	if arg1 == "" {
 		fullCommand = "send," + cmd
@@ -330,6 +335,7 @@ func sendIntruction(context *gin.Context) {
 	ioutil.WriteFile(path+"/instruction.txt", byteCommand, 0)
 	// ioutil.WriteFile("instruction.txt",byteCommand, 0)
 	// ioutil.WriteFile("instruction.txt", byteArg2, 0)
+	context.IndentedJSON(http.StatusAccepted, newInstruct)
 }
 
 func GetLocalIP() string {
@@ -375,9 +381,9 @@ func main() {
 	router.GET("/train/:id", getTrain)
 	router.POST("/command", commandTest)
 	router.POST("/train", addTrain)
-	router.GET("/instruct", getInstruction)
-	router.PATCH("/instruct", editInstruction)
-	router.GET("/send", sendIntruction)
+	// router.GET("/instruct", getInstruction)
+	// router.PATCH("/instruct", editInstruction)
+	router.POST("/instruct", sendIntruction)
 	fmt.Println("Serving the server with IP : ", GetLocalIP(), ":8000")
 	router.Run(":8000")
 }

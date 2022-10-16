@@ -27,6 +27,14 @@ def command():
     requests.post(f'http://localhost:8000/command', data=data)
     return {"None" : "None"}
 
+@app.route('/instruct', methods=['POST'])
+def instruct():
+    data = request.json
+    data = json.dumps(data)
+    print(data)
+    requests.post(f'http://localhost:8000/instruct', data=data)
+    return {"None" : "None"}
+
 if __name__ == "__main__":
     app.run(debug=True)
 

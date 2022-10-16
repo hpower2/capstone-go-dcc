@@ -351,6 +351,16 @@ func (r *repl) run() {
 				}
 				fmt.Printf("Success regsiter %s to address %s\n", arg1, arg2)
 				r.ctrl.AddLoco(l)
+				locos := r.ctrl.Locos()
+				cfg := &dcc.Config{
+					Locomotives: locos,
+				}
+				err = cfg.Save(configFlag)
+				if err != nil {
+					perr("Error: saving configuration: " + err.Error())
+					break
+				}
+				fmt.Println("Configuration saved to", configFlag)
 			case "unregister":
 				if i != 3 {
 					wrongArgs(cmd)
@@ -363,6 +373,16 @@ func (r *repl) run() {
 				}
 				fmt.Printf("Success unregsiter %s to address %s\n", arg1, arg2)
 				r.ctrl.RmLoco(l)
+				locos := r.ctrl.Locos()
+				cfg := &dcc.Config{
+					Locomotives: locos,
+				}
+				err := cfg.Save(configFlag)
+				if err != nil {
+					perr("Error: saving configuration: " + err.Error())
+					break
+				}
+				fmt.Println("Configuration saved to", configFlag)
 			case "status":
 				if i > 3 {
 					wrongArgs(cmd)
@@ -398,6 +418,16 @@ func (r *repl) run() {
 				l.Speed = uint8(n)
 				fmt.Printf("Success change speed %s to %s\n", arg1, arg2)
 				l.Apply()
+				locos := r.ctrl.Locos()
+				cfg := &dcc.Config{
+					Locomotives: locos,
+				}
+				err = cfg.Save(configFlag)
+				if err != nil {
+					perr("Error: saving configuration: " + err.Error())
+					break
+				}
+				fmt.Println("Configuration saved to", configFlag)
 			case "direction":
 				if i != 4 {
 					wrongArgs(cmd)
@@ -424,6 +454,16 @@ func (r *repl) run() {
 				default:
 					wrongArgs(cmd)
 				}
+				locos := r.ctrl.Locos()
+				cfg := &dcc.Config{
+					Locomotives: locos,
+				}
+				err := cfg.Save(configFlag)
+				if err != nil {
+					perr("Error: saving configuration: " + err.Error())
+					break
+				}
+				fmt.Println("Configuration saved to", configFlag)
 			// case "estop":
 			// 	if i != 1 {
 			// 		wrongArgs(cmd)
@@ -453,6 +493,16 @@ func (r *repl) run() {
 				default:
 					wrongArgs(cmd)
 				}
+				locos := r.ctrl.Locos()
+				cfg := &dcc.Config{
+					Locomotives: locos,
+				}
+				err := cfg.Save(configFlag)
+				if err != nil {
+					perr("Error: saving configuration: " + err.Error())
+					break
+				}
+				fmt.Println("Configuration saved to", configFlag)
 			case "save":
 				locos := r.ctrl.Locos()
 				cfg := &dcc.Config{

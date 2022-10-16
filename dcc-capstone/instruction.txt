@@ -1,1 +1,1 @@
-send,power,off
+send,direction,train_1,reverse
